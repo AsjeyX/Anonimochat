@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AnonimoChat - Chat Anónimo con Radio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            color: #e8e8f0;
+            min-height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Logo Premium */
+        .logo-animated {
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Login Container */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+            overflow-y: auto;
+        }
+
+        .login-card {
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #fff, #a0a0c0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 20px;
+            background: rgba(30, 30, 45, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .login-card input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .avatar-section {
+            margin-bottom: 20px;
+        }
+
+        .avatar-section label {
+            display: block;
+            margin-bottom: 10px;
+            color: #a0a0c0;
+            font-size: 0.9rem;
+        }
+
+        #avatar-preview {
+            margin-top: 10px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        #avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .info-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            background: #0a0a0f;
+            position: relative;
+        }
+
+        .chat-header {
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #667eea;
+        }
+
+        .user-nick {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Radio Player */
+        .radio-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(102, 126, 234, 0.15);
+            padding: 6px 12px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .radio-player span {
+            font-size: 0.8rem;
+            color: #667eea;
+        }
+
+        .radio-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            width: auto;
+        }
+
+        .radio-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: scale(1.05);
+        }
+
+        .radio-status {
+            font-size: 0.7rem;
+            color: #44ff44;
+        }
+
+        .btn-icon {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: auto;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        /* Chat Main */
+        .chat-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0a0a0f;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .chat-area.swiped {
+            transform: translateX(-280px);
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-bottom: 20px;
+        }
+
+        /* Mensajes */
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 20px;
+            animation: fadeInUp 0.3s ease;
+            word-wrap: break-word;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.other {
+            background: rgba(30, 30, 45, 0.9);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .message.system {
+            background: rgba(255,255,255,0.03);
+            text-align: center;
+            max-width: 100%;
+            color: #888;
+            font-size: 0.8rem;
+            padding: 8px;
+        }
+
+        .message .username {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+
+        .message .time {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.5);
+            margin-left: 8px;
+        }
+
+        .message img, .message video {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 6px;
+            cursor: pointer;
+        }
+
+        /* Input Area */
+        .message-input {
+            display: flex;
+            padding: 12px 16px;
+            background: rgba(15, 15, 26, 0.98);
+            backdrop-filter: blur(20px);
+            gap: 10px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .message-input input {
+            flex: 1;
+            padding: 14px 16px;
+            background: rgba(30, 30, 45, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px;
+            color: white;
+            font-size: 1rem;
+            min-height: 48px;
+        }
+
+        .message-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .message-input button {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        /* Users Panel */
+        .users-panel {
+            position: fixed;
+            right: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(15, 15, 26, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .users-panel.open {
+            right: 0;
+        }
+
+        .users-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .users-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #a0a0c0;
+        }
+
+        .close-users-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: auto;
+            padding: 5px;
+            color: #888;
+        }
+
+        .users-list {
+            flex: 1;
+            padding: 12px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .user-item:active {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .user-avatar-list {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(102, 126, 234, 0.5);
+        }
+
+        .user-info-list {
+            flex: 1;
+        }
+
+        .user-name-list {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-status {
+            font-size: 0.65rem;
+            color: #44ff44;
+        }
+
+        .swipe-indicator {
+            position: fixed;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60px;
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 2px;
+            z-index: 15;
+            cursor: pointer;
+        }
+
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 19;
+            display: none;
+        }
+
+        .panel-overlay.show {
+            display: block;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .admin-card {
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .admin-card h3 {
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: rgba(30, 30, 45, 0.8);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                max-width: 85%;
+            }
+            .radio-player span {
+                display: none;
+            }
+            .radio-player {
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ==================== CONFIGURACIÓN ====================
+        let currentUser = {
+            nick: '',
+            avatar: null,
+            color: '',
+            isAdmin: false
+        };
+        let currentChat = 'global';
+        let usersPanelOpen = false;
+        let radioAudio = null;
+        let radioPlaying = false;
+
+        // Radio Online - Los 40 Principales (stream oficial)
+        const RADIO_URL = 'https://streamingecuador.net:8008/radio40.m3u';
+        // URL alternativa más confiable
+        const RADIO_URL_ALT = 'https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40.mp3';
+
+        // Colores premium para nicks
+        const premiumColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DFE6E9', '#FF7675', '#74B9FF', '#A29BFE', '#FDCB6E',
+            '#6C5CE7', '#00CEC9', '#FF9F43', '#F368E0', '#0ABDE3'
+        ];
+
+        function getRandomColor() {
+            return premiumColors[Math.floor(Math.random() * premiumColors.length)];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== RADIO FUNCTIONS ====================
+        function initRadio() {
+            if (radioAudio) {
+                radioAudio.pause();
+                radioAudio = null;
+            }
+            
+            radioAudio = new Audio();
+            radioAudio.crossOrigin = "anonymous";
+            
+            // Intentar con la URL principal
+            radioAudio.src = RADIO_URL_ALT;
+            radioAudio.volume = 0.5;
+            
+            radioAudio.onerror = function() {
+                console.log('Error con stream principal, reintentando...');
+                setTimeout(() => {
+                    if (radioAudio) {
+                        radioAudio.src = RADIO_URL;
+                        radioAudio.load();
+                    }
+                }, 1000);
+            };
+            
+            radioAudio.load();
+        }
+
+        function startRadio() {
+            if (radioAudio) {
+                radioAudio.play().then(() => {
+                    radioPlaying = true;
+                    updateRadioUI();
+                }).catch(err => {
+                    console.log('Error al reproducir radio:', err);
+                    // El navegador puede bloquear la reproducción automática
+                    radioPlaying = false;
+                    updateRadioUI();
+                });
+            }
+        }
+
+        function stopRadio() {
+            if (radioAudio) {
+                radioAudio.pause();
+                radioPlaying = false;
+                updateRadioUI();
+            }
+        }
+
+        function toggleRadio() {
+            if (radioPlaying) {
+                stopRadio();
+            } else {
+                startRadio();
+            }
+        }
+
+        function updateRadioUI() {
+            const radioStatus = document.getElementById('radio-status');
+            const radioToggleBtn = document.getElementById('radio-toggle-btn');
+            if (radioStatus) {
+                radioStatus.textContent = radioPlaying ? '🔴 En vivo' : '⚪ Offline';
+                radioStatus.style.color = radioPlaying ? '#44ff44' : '#888';
+            }
+            if (radioToggleBtn) {
+                radioToggleBtn.textContent = radioPlaying ? '⏸️' : '▶️';
+            }
+        }
+
+        // ==================== ALMACENAMIENTO ====================
+        function saveMessage(message) {
+            let messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
+            messages.push(message);
+            if (messages.length > 200) messages = messages.slice(-200);
+            localStorage.setItem('chat_messages', JSON.stringify(messages));
+        }
+
+        // ==================== LOGIN ====================
+        function showLogin() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="login-container">
+                    <div class="logo-animated">
+                        ✦ ANONIMOCHAT ✦
+                    </div>
+                    <div class="login-card">
+                        <h2>Bienvenido</h2>
+                        <input type="text" id="nickname" placeholder="Elige tu nick" maxlength="20" autocomplete="off">
+                        <div class="avatar-section">
+                            <label>Foto de perfil</label>
+                            <input type="file" id="avatar" accept="image/*">
+                            <div id="avatar-preview"></div>
+                        </div>
+                        <button class="btn-primary" id="btn-enter">✦ ENTRAR AL CHAT ✦</button>
+                        <p class="info-text">Sin registros · Anónimo · Radio 40 Principales</p>
+                    </div>
+                </div>
+            `;
+
+            let avatarData = null;
+            const avatarInput = document.getElementById('avatar');
+            const preview = document.getElementById('avatar-preview');
+
+            avatarInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        avatarData = e.target.result;
+                        preview.innerHTML = `<img src="${avatarData}" alt="Avatar">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('btn-enter').addEventListener('click', () => {
+                const nick = document.getElementById('nickname').value.trim();
+                if (!nick) {
+                    alert('Por favor, elige un nick');
+                    return;
+                }
+
+                if (nick === 'santodimingo_1975') {
+                    showAdminPanel();
+                    return;
+                }
+
+                const color = getRandomColor();
+                currentUser = {
+                    nick: nick,
+                    avatar: avatarData || `https://ui-avatars.com/api/?background=${color.replace('#', '')}&color=fff&bold=true&name=${nick.charAt(0)}`,
+                    color: color,
+                    isAdmin: false
+                };
+
+                showChat();
+            });
+        }
+
+        // ==================== CHAT PRINCIPAL ====================
+        function showChat() {
+            // Inicializar radio
+            initRadio();
+            
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="user-info">
+                            <img class="user-avatar-small" src="${currentUser.avatar}" alt="avatar">
+                            <span class="user-nick" style="color: ${currentUser.color}">${escapeHtml(currentUser.nick)}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <div class="radio-player">
+                                <span>📻 LOS40</span>
+                                <button class="radio-btn" id="radio-toggle-btn">▶️</button>
+                                <span class="radio-status" id="radio-status">⚪ Cargando...</span>
+                            </div>
+                            <button class="btn-icon" id="toggle-users-btn">👥</button>
+                            <button class="btn-icon" id="logout-btn">🚪</button>
+                        </div>
+                    </div>
+                    <div class="chat-main">
+                        <div class="chat-area" id="chat-area">
+                            <div class="messages-area" id="messages-area">
+                                <div class="message system">✨ Bienvenido al chat grupal, ${escapeHtml(currentUser.nick)}</div>
+                                <div class="message system">📻 Radio 40 Principales - ¡Música en vivo!</div>
+                            </div>
+                            <div class="message-input">
+                                <input type="text" id="message-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                                <button id="send-image" class="btn-icon" title="Enviar imagen">📷</button>
+                                <button id="send-video" class="btn-icon" title="Enviar video">🎥</button>
+                                <button id="send-message" class="btn-primary" style="width: auto; padding: 0 18px;">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swipe-indicator" id="swipe-indicator"></div>
+                    <div class="users-panel" id="users-panel">
+                        <div class="users-header">
+                            <h3>✦ Conectados ✦</h3>
+                            <button class="close-users-btn" id="close-users-btn">✕</button>
+                        </div>
+                        <div class="users-list" id="users-list"></div>
+                    </div>
+                    <div class="panel-overlay" id="panel-overlay"></div>
+                </div>
+            `;
+
+            // Configurar radio UI
+            document.getElementById('radio-toggle-btn').onclick = () => toggleRadio();
+            
+            // Intentar iniciar radio automáticamente
+            setTimeout(() => {
+                startRadio();
+            }, 500);
+
+            // Swipe functionality
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const chatArea = document.getElementById('chat-area');
+            const usersPanel = document.getElementById('users-panel');
+            const overlay = document.getElementById('panel-overlay');
+
+            chatArea.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            chatArea.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+
+            function handleSwipe() {
+                const swipeDistance = touchEndX - touchStartX;
+                if (swipeDistance < -50 && !usersPanelOpen) {
+                    openUsersPanel();
+                } else if (swipeDistance > 50 && usersPanelOpen) {
+                    closeUsersPanel();
+                }
+            }
+
+            function openUsersPanel() {
+                usersPanel.classList.add('open');
+                overlay.classList.add('show');
+                usersPanelOpen = true;
+                chatArea.classList.add('swiped');
+            }
+
+            function closeUsersPanel() {
+                usersPanel.classList.remove('open');
+                overlay.classList.remove('show');
+                usersPanelOpen = false;
+                chatArea.classList.remove('swiped');
+            }
+
+            document.getElementById('toggle-users-btn').onclick = () => {
+                if (usersPanelOpen) closeUsersPanel();
+                else openUsersPanel();
+            };
+            document.getElementById('close-users-btn').onclick = closeUsersPanel;
+            overlay.onclick = closeUsersPanel;
+            document.getElementById('swipe-indicator').onclick = () => {
+                if (usersPanelOpen) closeUsersPanel();
+                else openUsersPanel();
+            };
+
+            loadMessages();
+            updateUsersList();
+
+            document.getElementById('send-message').addEventListener('click', () => sendMessage());
+            document.getElementById('message-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+            document.getElementById('send-image').addEventListener('click', () => sendFile('image'));
+            document.getElementById('send-video').addEventListener('click', () => sendFile('video'));
+            document.getElementById('logout-btn').addEventListener('click', logout);
+
+            setInterval(() => {
+                updateUsersList();
+                loadMessages();
+                cleanDisconnectedUsers();
+            }, 2000);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const message = {
+                id: Date.now(),
+                type: 'text',
+                content: text,
+                sender: currentUser.nick,
+                senderColor: currentUser.color,
+                senderAvatar: currentUser.avatar,
+                timestamp: new Date().toLocaleTimeString(),
+                chat: currentChat
+            };
+
+            saveMessage(message);
+            displayMessage(message);
+            input.value = '';
+            input.focus();
+        }
+
+        function sendFile(type) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = type === 'image' ? 'image/*' : 'video/*';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file && file.size < 50 * 1024 * 1024) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const message = {
+                            id: Date.now(),
+                            type: type,
+                            content: e.target.result,
+                            sender: currentUser.nick,
+                            senderColor: currentUser.color,
+                            senderAvatar: currentUser.avatar,
+                            timestamp: new Date().toLocaleTimeString(),
+                            chat: currentChat
+                        };
+                        saveMessage(message);
+                        displayMessage(message);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Archivo muy grande (máx 50MB)');
+                }
+            };
+            input.click();
+        }
+
+        function displayMessage(message) {
+            const messagesArea = document.getElementById('messages-area');
+            if (!messagesArea) return;
+            if (message.chat !== currentChat && message.chat !== 'global') return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender === currentUser.nick ? 'own' : 'other'}`;
+            messageDiv.setAttribute('data-id', message.id);
+
+            let contentHtml = '';
+            if (message.type === 'text') {
+                contentHtml = `<p style="margin: 0;">${escapeHtml(message.content)}</p>`;
+            } else if (message.type === 'image') {
+                contentHtml = `<img src="${message.content}" alt="Imagen" onclick="window.open(this.src)">`;
+            } else if (message.type === 'video') {
+                contentHtml = `<video controls src="${message.content}" style="max-width: 100%; max-height: 200px;"></video>`;
+            }
+
+            messageDiv.innerHTML = `
+                <div>
+                    <span class="username" style="color: ${message.senderColor}">${escapeHtml(message.sender)}</span>
+                    <span class="time">${message.timestamp}</span>
+                </div>
+                ${contentHtml}
+            `;
+
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
+            const messagesArea = document.getElementById('messages-area');
+            if (!messagesArea) return;
+
+            let filtered = messages.filter(m => {
+                if (currentChat === 'global') {
+                    return m.chat === 'global';
+                } else {
+                    return m.chat === currentChat || (m.chat === 'global' && m.sender === currentChat);
+                }
+            });
+
+            const currentIds = Array.from(messagesArea.children).map(child => child.getAttribute('data-id'));
+            const newMessages = filtered.filter(m => !currentIds.includes(m.id.toString()));
+
+            newMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender === currentUser.nick ? 'own' : 'other'}`;
+                messageDiv.setAttribute('data-id', msg.id);
+
+                let contentHtml = '';
+                if (msg.type === 'text') {
+                    contentHtml = `<p style="margin: 0;">${escapeHtml(msg.content)}</p>`;
+                } else if (msg.type === 'image') {
+                    contentHtml = `<img src="${msg.content}" alt="Imagen" onclick="window.open(this.src)">`;
+                } else if (msg.type === 'video') {
+                    contentHtml = `<video controls src="${msg.content}" style="max-width: 100%; max-height: 200px;"></video>`;
+                }
+
+                messageDiv.innerHTML = `
+                    <div>
+                        <span class="username" style="color: ${msg.senderColor}">${escapeHtml(msg.sender)}</span>
+                        <span class="time">${msg.timestamp}</span>
+                    </div>
+                    ${contentHtml}
+                `;
+
+                messagesArea.appendChild(messageDiv);
+            });
+
+            if (newMessages.length > 0) {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+        }
+
+        function updateUsersList() {
+            let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+            
+            const currentUserIndex = users.findIndex(u => u.nick === currentUser.nick);
+            if (currentUserIndex !== -1) {
+                users[currentUserIndex].lastSeen = Date.now();
+            } else {
+                users.push({ 
+                    nick: currentUser.nick, 
+                    color: currentUser.color, 
+                    avatar: currentUser.avatar,
+                    lastSeen: Date.now()
+                });
+            }
+            
+            users = users.filter(u => (Date.now() - (u.lastSeen || 0)) < 10000);
+            users = users.filter(u => u.nick !== 'Admin');
+            
+            const admin = { nick: 'Admin', color: '#ff4444', avatar: null, isAdmin: true };
+            users.unshift(admin);
+            
+            localStorage.setItem('active_users', JSON.stringify(users));
+
+            const container = document.getElementById('users-list');
+            if (container) {
+                container.innerHTML = users.map(user => `
+                    <div class="user-item" onclick="startPrivateChat('${user.nick}')">
+                        <img class="user-avatar-list" src="${user.avatar || `https://ui-avatars.com/api/?background=${user.color.replace('#', '')}&color=fff&bold=true&name=${user.nick.charAt(0)}`}">
+                        <div class="user-info-list">
+                            <div class="user-name-list" style="color: ${user.color}">${escapeHtml(user.nick)} ${user.isAdmin ? '👑' : ''}</div>
+                            <div class="user-status">● Conectado</div>
+                        </div>
+                        ${!user.isAdmin && user.nick !== currentUser.nick ? `<button class="call-btn-list btn-icon" style="width: 32px; height: 32px; padding: 0;" onclick="event.stopPropagation(); startCall('${user.nick}')">🎥</button>` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function cleanDisconnectedUsers() {
+            let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+            const filtered = users.filter(u => (Date.now() - (u.lastSeen || 0)) < 10000);
+            if (filtered.length !== users.length) {
+                localStorage.setItem('active_users', JSON.stringify(filtered));
+            }
+        }
+
+        window.startPrivateChat = function(nick) {
+            if (nick === currentUser.nick) return;
+            currentChat = nick;
+            const messagesArea = document.getElementById('messages-area');
+            if (messagesArea) {
+                messagesArea.innerHTML = `<div class="message system">💬 Chat privado con ${escapeHtml(nick)}</div>`;
+            }
+            loadMessages();
+            document.getElementById('users-panel').classList.remove('open');
+            document.getElementById('panel-overlay').classList.remove('show');
+            document.getElementById('chat-area').classList.remove('swiped');
+            usersPanelOpen = false;
+        };
+
+        window.startCall = function(targetNick) {
+            alert(`📞 Llamando a ${targetNick}\n\n🔧 Función premium en desarrollo`);
+        };
+
+        // ==================== ADMIN PANEL ====================
+        function showAdminPanel() {
+            // Detener radio si estaba sonando
+            if (radioAudio) {
+                radioAudio.pause();
+            }
+            
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="admin-panel">
+                    <div class="logo-animated" style="font-size: 2rem;">✦ ANONIMOCHAT ADMIN ✦</div>
+                    <div class="stats">
+                        <div class="stat-box"><div class="stat-number" id="total-users">0</div><div>Usuarios conectados</div></div>
+                        <div class="stat-box"><div class="stat-number" id="total-messages">0</div><div>Mensajes totales</div></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>👥 Usuarios Conectados</h3>
+                        <div id="admin-users-list"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>⚙️ Control Total</h3>
+                        <button id="clear-all-messages" class="btn-primary btn-danger" style="margin-bottom: 10px;">🗑️ Borrar todos los mensajes</button>
+                        <button id="logout-admin" class="btn-primary">Salir del panel</button>
+                    </div>
+                </div>
+            `;
+
+            loadAdminStats();
+            loadAdminUsers();
+
+            document.getElementById('clear-all-messages').onclick = () => {
+                if (confirm('¿Borrar TODOS los mensajes?')) {
+                    localStorage.setItem('chat_messages', '[]');
+                    loadAdminStats();
+                    alert('Mensajes borrados');
+                }
+            };
+            document.getElementById('logout-admin').onclick = () => {
+                showLogin();
+            };
+
+            setInterval(() => {
+                loadAdminStats();
+                loadAdminUsers();
+            }, 3000);
+        }
+
+        function loadAdminStats() {
+            const messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
+            let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+            users = users.filter(u => (Date.now() - (u.lastSeen || 0)) < 10000);
+            document.getElementById('total-users').textContent = users.length;
+            document.getElementById('total-messages').textContent = messages.length;
+        }
+
+        function loadAdminUsers() {
+            let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+            users = users.filter(u => (Date.now() - (u.lastSeen || 0)) < 10000);
+            const container = document.getElementById('admin-users-list');
+            if (container) {
+                container.innerHTML = users.map(user => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div><span style="color: ${user.color}">${escapeHtml(user.nick)}</span></div>
+                        <button class="btn-danger" style="width: auto; padding: 5px 15px;" onclick="banUser('${user.nick}')">Expulsar</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.banUser = function(nick) {
+            if (confirm(`¿Expulsar a ${nick}?`)) {
+                let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+                users = users.filter(u => u.nick !== nick);
+                localStorage.setItem('active_users', JSON.stringify(users));
+                alert(`${nick} ha sido expulsado`);
+                loadAdminUsers();
+                loadAdminStats();
+            }
+        };
+
+        function logout() {
+            // Detener radio al salir
+            if (radioAudio) {
+                radioAudio.pause();
+                radioAudio = null;
+            }
+            
+            let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+            users = users.filter(u => u.nick !== currentUser.nick);
+            localStorage.setItem('active_users', JSON.stringify(users));
+            showLogin();
+        }
+
+        // Mantener usuario activo
+        setInterval(() => {
+            if (currentUser.nick && !currentUser.isAdmin && currentUser.nick !== 'Admin') {
+                let users = JSON.parse(localStorage.getItem('active_users') || '[]');
+                const index = users.findIndex(u => u.nick === currentUser.nick);
+                if (index !== -1) {
+                    users[index].lastSeen = Date.now();
+                    localStorage.setItem('active_users', JSON.stringify(users));
+                }
+            }
+        }, 3000);
+
+        showLogin();
+    </script>
+</body>
+</html>
